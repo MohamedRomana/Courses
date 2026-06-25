@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Bash(flutter pub *)",
+      "Bash(flutter test *)",
+      "Bash(flutter devices *)",
+      "Bash(timeout 600 flutter run -d 192.168.1.8:5555 --debug)",
+      "Bash(tee /c/Users/Dell/AppData/Local/Temp/claude/d--Projects-courses/683cf0d5-51b5-4235-b0be-0b0dfee7952a/scratchpad/run_log.txt)",
+      "Read(//c/Users/Dell/AppData/Local/Temp/claude/d--Projects-courses/683cf0d5-51b5-4235-b0be-0b0dfee7952a/tasks/**)",
+      "Bash(timeout 500 flutter run -d 192.168.1.8:5555 --debug)",
+      "Bash(tee /c/Users/Dell/AppData/Local/Temp/claude/d--Projects-courses/683cf0d5-51b5-4235-b0be-0b0dfee7952a/scratchpad/run2.txt)",
+      "Bash(gh auth *)",
+      "Bash(gh api *)",
+      "Bash(gh repo *)"
+    ]
+  }
+}
