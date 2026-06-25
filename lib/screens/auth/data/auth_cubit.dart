@@ -85,6 +85,11 @@ class AuthCubit extends Cubit<AuthState> {
     emit(RegisterLoading());
     await Future.delayed(_fakeLatency);
     await CacheHelper.setUserId(_demoUserId);
+    await CacheHelper.setUserProfile(
+      name: firstName,
+      phone: phone,
+      email: email,
+    );
     emit(RegisterSuccess(message: LocaleKeys.activatedSuccessfully.tr()));
   }
 
@@ -98,6 +103,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(LogInLoading());
     await Future.delayed(_fakeLatency);
     await CacheHelper.setUserId(_demoUserId);
+    await CacheHelper.setUserProfile(phone: phone);
     emit(LogInSuccess());
   }
 

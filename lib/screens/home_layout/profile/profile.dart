@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:unicourse/core/constants/colors.dart';
 import 'package:unicourse/core/widgets/app_router.dart';
-import 'package:unicourse/core/widgets/app_text.dart';
 import 'package:unicourse/generated/locale_keys.g.dart';
 import '../../../core/cache/cache_helper.dart';
-import '../../../core/widgets/custom_appbar.dart';
 import '../../../core/widgets/no_account_alert.dart';
 import '../../../gen/fonts.gen.dart';
 import '../../certificates/certificates.dart';
@@ -16,218 +14,135 @@ import 'contact_us/contact_us.dart';
 import 'privacy_policy/privacy_policy.dart';
 import 'widgets/custom_logout_dialog.dart';
 import 'widgets/profile_image.dart';
+import 'widgets/profile_tile.dart';
+import 'widgets/theme_selector.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+    final isAr = context.locale.languageCode == 'ar';
+
     return Scaffold(
-      appBar: CustomAppBar(title: LocaleKeys.profile.tr(), isNoti: false),
-      body:
-          CacheHelper.getUserId() == ""
-              ? const NoAcoountAlert()
-              : SingleChildScrollView(
+      body: CacheHelper.getUserId() == ""
+          ? const NoAcoountAlert()
+          : SafeArea(
+              bottom: false,
+              child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+                padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 110.h),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const ProfileImage(),
-                    SizedBox(height: 40.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.language, size: 28.sp),
-                            AppText(
-                              text: LocaleKeys.language.tr(),
-                              size: 18.sp,
-                              color: Colors.black,
-                              family: FontFamily.dINArabicBold,
-                              start: 10.w,
-                            ),
-                          ],
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 16.h, top: 4.h),
+                      child: Text(
+                        LocaleKeys.profile.tr(),
+                        style: TextStyle(
+                          fontFamily: FontFamily.dINArabicBold,
+                          fontSize: 24.sp,
+                          color: palette.textPrimary,
                         ),
-                        if (context.locale.languageCode == 'en') ...{
-                          InkWell(
-                            onTap: () {
-                              context.setLocale(const Locale('ar'));
-                              AppRouter.navigateAndFinish(
-                                context,
-                                const HomeLayout(),
-                              );
-                            },
-                            child: AppText(
-                              text: 'العربية',
-                              size: 18.sp,
-                              color: Colors.lightBlue,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        } else if (context.locale.languageCode == 'ar') ...{
-                          InkWell(
-                            onTap: () {
-                              context.setLocale(const Locale('en'));
-                              AppRouter.navigateAndFinish(
-                                context,
-                                const HomeLayout(),
-                              );
-                            },
-                            child: AppText(
-                              text: 'English',
-                              size: 18.sp,
-                              color: Colors.lightBlue,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        },
+                      ),
+                    ),
+                    const ProfileImage(),
+                    SizedBox(height: 24.h),
+
+                    // ── Preferences ──
+                    ProfileSection(
+                      title: isAr ? 'التفضيلات' : 'Preferences',
+                      children: [
+                        ProfileTile(
+                          icon: Icons.dark_mode_outlined,
+                          title: isAr ? 'المظهر' : 'Appearance',
+                          trailing: const ThemeSelector(),
+                        ),
+                        Divider(height: 1, color: palette.border),
+                        ProfileTile(
+                          icon: Icons.language_rounded,
+                          iconColor: palette.accent,
+                          title: LocaleKeys.language.tr(),
+                          trailing: _LangSwitch(isAr: isAr),
+                          onTap: () => _toggleLang(context, isAr),
+                        ),
                       ],
                     ),
-                    Divider(color: AppColors.secondray, thickness: 1.h),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () {
-                        AppRouter.navigateTo(
-                          context,
-                          const CertificatesScreen(),
-                        );
-                      },
-                      child: SizedBox(
-                        height: 40.h,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.workspace_premium_outlined,
-                                  size: 28.sp,
-                                ),
-                                AppText(
-                                  text: LocaleKeys.certificates.tr(),
-                                  size: 18.sp,
-                                  color: Colors.black,
-                                  family: FontFamily.dINArabicBold,
-                                  start: 10.w,
-                                ),
-                              ],
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 18.sp,
-                              color: Colors.black,
-                            ),
-                          ],
+                    SizedBox(height: 18.h),
+
+                    // ── Account ──
+                    ProfileSection(
+                      title: isAr ? 'الحساب' : 'Account',
+                      children: [
+                        ProfileTile(
+                          icon: Icons.workspace_premium_rounded,
+                          iconColor: AppColors.gold,
+                          title: LocaleKeys.certificates.tr(),
+                          onTap: () => AppRouter.navigateTo(
+                              context, const CertificatesScreen()),
                         ),
-                      ),
-                    ),
-                    Divider(color: AppColors.secondray, thickness: 1.h),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () {
-                        AppRouter.navigateTo(context, const AboutUs());
-                      },
-                      child: SizedBox(
-                        height: 40.h,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.info_outline, size: 28.sp),
-                                AppText(
-                                  text: LocaleKeys.aboutus.tr(),
-                                  size: 18.sp,
-                                  color: Colors.black,
-                                  family: FontFamily.dINArabicBold,
-                                  start: 10.w,
-                                ),
-                              ],
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 18.sp,
-                              color: Colors.black,
-                            ),
-                          ],
+                        Divider(height: 1, color: palette.border),
+                        ProfileTile(
+                          icon: Icons.info_outline_rounded,
+                          title: LocaleKeys.aboutus.tr(),
+                          onTap: () =>
+                              AppRouter.navigateTo(context, const AboutUs()),
                         ),
-                      ),
-                    ),
-                    Divider(color: AppColors.secondray, thickness: 1.h),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () {
-                        AppRouter.navigateTo(context, const PrivacyPolicy());
-                      },
-                      child: SizedBox(
-                        height: 40.h,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.description_outlined, size: 28.sp),
-                                AppText(
-                                  text: LocaleKeys.privacyPolicy.tr(),
-                                  size: 18.sp,
-                                  color: Colors.black,
-                                  family: FontFamily.dINArabicBold,
-                                  start: 10.w,
-                                ),
-                              ],
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 18.sp,
-                              color: Colors.black,
-                            ),
-                          ],
+                        Divider(height: 1, color: palette.border),
+                        ProfileTile(
+                          icon: Icons.shield_outlined,
+                          title: LocaleKeys.privacyPolicy.tr(),
+                          onTap: () => AppRouter.navigateTo(
+                              context, const PrivacyPolicy()),
                         ),
-                      ),
-                    ),
-                    Divider(color: AppColors.secondray, thickness: 1.h),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () {
-                        AppRouter.navigateTo(context, const ContactUs());
-                      },
-                      child: SizedBox(
-                        height: 40.h,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.mail_outline, size: 28.sp),
-                                AppText(
-                                  text: LocaleKeys.contactUs.tr(),
-                                  size: 18.sp,
-                                  color: Colors.black,
-                                  family: FontFamily.dINArabicBold,
-                                  start: 10.w,
-                                ),
-                              ],
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 18.sp,
-                              color: Colors.black,
-                            ),
-                          ],
+                        Divider(height: 1, color: palette.border),
+                        ProfileTile(
+                          icon: Icons.mail_outline_rounded,
+                          title: LocaleKeys.contactUs.tr(),
+                          onTap: () =>
+                              AppRouter.navigateTo(context, const ContactUs()),
                         ),
-                      ),
+                      ],
                     ),
-                    Divider(color: AppColors.secondray, thickness: 1.h),
+                    SizedBox(height: 18.h),
+
+                    // ── Danger zone (delete + logout) ──
                     const CustomLogOutDialog(),
                   ],
                 ),
               ),
+            ),
+    );
+  }
+
+  void _toggleLang(BuildContext context, bool isAr) {
+    context.setLocale(Locale(isAr ? 'en' : 'ar'));
+    AppRouter.navigateAndFinish(context, const HomeLayout());
+  }
+}
+
+class _LangSwitch extends StatelessWidget {
+  final bool isAr;
+  const _LangSwitch({required this.isAr});
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: palette.brandSoft,
+        borderRadius: BorderRadius.circular(30.r),
+      ),
+      child: Text(
+        isAr ? 'English' : 'العربية',
+        style: TextStyle(
+          fontFamily: FontFamily.dINArabicBold,
+          fontSize: 12.sp,
+          color: palette.brand,
+        ),
+      ),
     );
   }
 }

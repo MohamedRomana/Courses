@@ -10,6 +10,11 @@ class CacheHelper {
   static const _language = 'lang';
   static const _deviceToken = 'deviceToken';
   static const _themeMode = 'themeMode'; // 'light' | 'dark' | 'system'
+  // Local (offline) user profile
+  static const _userName = 'userName';
+  static const _userPhone = 'userPhone';
+  static const _userEmail = 'userEmail';
+  static const _userAvatar = 'userAvatar';
   static const _selectedCoursesKey = 'selectedCourses';
   static const _completedCoursesKey = 'completedCourses';
   static const _savedCoursesKey = 'savedCourses';
@@ -57,6 +62,24 @@ class CacheHelper {
   static String getThemeMode() {
     return _preferences.getString(_themeMode) ?? 'system';
   }
+
+  // ── Local (offline) user profile ──
+  static Future<void> setUserProfile({
+    String? name,
+    String? phone,
+    String? email,
+    String? avatar,
+  }) async {
+    if (name != null) await _preferences.setString(_userName, name);
+    if (phone != null) await _preferences.setString(_userPhone, phone);
+    if (email != null) await _preferences.setString(_userEmail, email);
+    if (avatar != null) await _preferences.setString(_userAvatar, avatar);
+  }
+
+  static String getUserName() => _preferences.getString(_userName) ?? '';
+  static String getUserPhone() => _preferences.getString(_userPhone) ?? '';
+  static String getUserEmail() => _preferences.getString(_userEmail) ?? '';
+  static String getUserAvatar() => _preferences.getString(_userAvatar) ?? '';
 
   // Clear Data
   static clearData() async {

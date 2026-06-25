@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +7,7 @@ import '../../../../core/service/cubit/app_cubit.dart';
 import '../../../../core/widgets/app_input.dart';
 import '../../../../core/widgets/app_text.dart';
 import '../../../../generated/locale_keys.g.dart';
+import '../../../../gen/fonts.gen.dart';
 
 class EditProfileFields extends StatefulWidget {
   final TextEditingController nameController;
@@ -32,139 +32,90 @@ class _EditProfileFieldsState extends State<EditProfileFields> {
   void initState() {
     super.initState();
     AppCubit.get(context).removeProfileImage();
-    widget.nameController.clear();
-    widget.phoneController.clear();
-    widget.emailController.clear();
+    final user = AppCubit.get(context).userModel;
+    widget.nameController.text = (user["first_name"] ?? '').toString();
+    widget.phoneController.text = (user["phone"] ?? '').toString();
+    widget.emailController.text = (user["email"] ?? '').toString();
     widget.passController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    AppCubit cubit = AppCubit.get(context);
+    final palette = context.palette;
+    final cubit = AppCubit.get(context);
     return BlocBuilder<AppCubit, AppState>(
       builder: (context, state) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppText(
-              start: 18.w,
-              text: LocaleKeys.edit_personal_information.tr(),
-              size: 18.sp,
-              fontWeight: FontWeight.w500,
+            Padding(
+              padding: EdgeInsetsDirectional.only(start: 20.w, bottom: 12.h),
+              child: AppText(
+                text: LocaleKeys.edit_personal_information.tr(),
+                size: 16.sp,
+                family: FontFamily.dINArabicBold,
+                color: palette.textPrimary,
+              ),
             ),
             Container(
-              width: 343.w,
-              padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 10.sp),
-              margin: EdgeInsets.all(16.sp),
+              margin: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 4.w),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey,
-                    spreadRadius: 1.r,
-                    blurRadius: 5.r,
-                    offset: Offset(0, 5.r),
-                  ),
-                ],
+                color: palette.surface,
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: palette.border),
               ),
               child: Column(
                 children: [
                   AppInput(
                     filled: true,
-                    enabledBorderColor: Colors.grey,
-                    hint: cubit.userModel["first_name"],
+                    hint: LocaleKeys.username.tr(),
                     controller: widget.nameController,
-                    prefixIcon: const Icon(
-                      Icons.person_outlined,
-                      color: AppColors.primary,
-                    ),
+                    prefixIcon: Icon(Icons.person_outline,
+                        color: palette.brand, size: 22.sp),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 14.h),
                   AppInput(
                     filled: true,
-                    enabledBorderColor: Colors.grey,
-                    hint: cubit.userModel["phone"],
+                    hint: LocaleKeys.phone.tr(),
                     controller: widget.phoneController,
                     inputType: TextInputType.phone,
-                    prefixIcon: Icon(
-                      Icons.phone_outlined,
-                      color: AppColors.primary,
-                      size: 25.sp,
-                    ),
+                    prefixIcon: Icon(Icons.phone_outlined,
+                        color: palette.brand, size: 22.sp),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 14.h),
                   AppInput(
                     filled: true,
-                    enabledBorderColor: Colors.grey,
-                    hint: cubit.userModel["email"],
+                    hint: LocaleKeys.email.tr(),
                     controller: widget.emailController,
                     inputType: TextInputType.emailAddress,
-                    prefixIcon: Icon(
-                      Icons.email_outlined,
-                      color: AppColors.primary,
-                      size: 25.sp,
-                    ),
+                    prefixIcon: Icon(Icons.email_outlined,
+                        color: palette.brand, size: 22.sp),
                   ),
-                  SizedBox(height: 16.h),
-                  BlocBuilder<AppCubit, AppState>(
-                    builder: (context, state) {
-                      return AppInput(
-                        filled: true,
-                        hint: LocaleKeys.password.tr(),
-                        enabledBorderColor: Colors.grey,
-                        controller: widget.passController,
-                        validate: (value) {
-                          if (value!.isEmpty) {
-                            return LocaleKeys.passwordValidate.tr();
-                          } else {
-                            return null;
-                          }
-                        },
-                        prefixIcon: Icon(
-                          Icons.lock,
-                          color: AppColors.primary,
-                          size: 25.sp,
+                  SizedBox(height: 14.h),
+                  AppInput(
+                    filled: true,
+                    hint: LocaleKeys.password.tr(),
+                    controller: widget.passController,
+                    secureText: cubit.isSecureLogIn,
+                    prefixIcon: Icon(Icons.lock_outline,
+                        color: palette.brand, size: 22.sp),
+                    suffixIcon: InkWell(
+                      onTap: () =>
+                          cubit.isSecureLogInIcon(!cubit.isSecureLogIn),
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      child: Padding(
+                        padding: EdgeInsets.all(8.h),
+                        child: Icon(
+                          cubit.isSecureLogIn
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: palette.textMuted,
+                          size: 21.sp,
                         ),
-                        secureText: AppCubit.get(context).isSecureLogIn,
-                        suffixIcon:
-                            AppCubit.get(context).isSecureLogIn
-                                ? InkWell(
-                                  onTap: () {
-                                    AppCubit.get(
-                                      context,
-                                    ).isSecureLogInIcon(false);
-                                  },
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.h),
-                                    child: Icon(
-                                      Icons.visibility_off,
-                                      color: Colors.grey,
-                                      size: 21.sp,
-                                    ),
-                                  ),
-                                )
-                                : InkWell(
-                                  onTap: () {
-                                    AppCubit.get(
-                                      context,
-                                    ).isSecureLogInIcon(true);
-                                  },
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.h),
-                                    child: Icon(
-                                      Icons.visibility,
-                                      color: AppColors.primary,
-                                      size: 21.sp,
-                                    ),
-                                  ),
-                                ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ],
               ),

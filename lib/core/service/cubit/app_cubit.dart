@@ -120,32 +120,21 @@ class AppCubit extends Cubit<AppState> {
   }
 
   Map userModel = {};
+
+  /// Offline/demo profile: the backend is gone, so the profile is built from
+  /// the locally cached values saved during register / login / profile edit.
   Future getUserData() async {
     emit(GetUserDataLoading());
-    try {
-      http.Response response = await http
-          .post(
-            Uri.parse("${baseUrl}api/show-user"),
-            body: {
-              "lang": CacheHelper.getLang(),
-              "user_id": CacheHelper.getUserId(),
-            },
-          )
-          .timeout(const Duration(seconds: 15));
-      Map<String, dynamic> data = jsonDecode(response.body);
-
-      if (data["key"] == 1) {
-        userModel = data["data"];
-        debugPrint(userModel.toString());
-        emit(GetUserDataSuccess());
-      } else {
-        emit(GetUserDataFailure(error: data["msg"]));
-      }
-    } catch (error) {
-      // Network/DNS/timeout — don't crash with an unhandled exception.
-      debugPrint("getUserData failed: $error");
-      emit(GetUserDataFailure(error: error.toString()));
-    }
+    final name = CacheHelper.getUserName();
+    userModel = {
+      "first_name": name.isEmpty
+          ? (CacheHelper.getLang() == "en" ? "UniCourse Learner" : "متعلّم UniCourse")
+          : name,
+      "phone": CacheHelper.getUserPhone(),
+      "email": CacheHelper.getUserEmail(),
+      "avatar": CacheHelper.getUserAvatar(),
+    };
+    emit(GetUserDataSuccess());
   }
 
   String? profileImageUrl;
@@ -182,57 +171,29 @@ class AppCubit extends Cubit<AppState> {
     }
   }
 
+  /// Offline profile update: persist the new values locally and refresh.
   Future updateProfile({
     required String firstName,
     required String phone,
     required String email,
     required String password,
   }) async {
-    if (profileImage.isNotEmpty) {
-      await uploadProfileImage();
-    }
     emit(UpdateProfileLoading());
-    try {
-      http.Response response = await http
-          .post(
-            Uri.parse("${baseUrl}api/update-user"),
-            body: {
-              "lang": CacheHelper.getLang(),
-              "user_id": CacheHelper.getUserId(),
-              "first_name": firstName,
-              "phone": phone,
-              "email": email,
-              "password": password,
-              if (profileImage.isNotEmpty) "avatar": profileImageUrl,
-            },
-          )
-          .timeout(const Duration(milliseconds: 8000));
-
-      if (response.statusCode == 500) {
-        emit(ServerError());
-      } else {
-        Map<String, dynamic> data = jsonDecode(response.body);
-        debugPrint(data.toString());
-
-        if (data["key"] == 1) {
-          emit(UpdateProfileSuccess(message: data["msg"]));
-          profileImage.clear();
-          profileImageUrl = null;
-          getUserData();
-        } else {
-          debugPrint(data["msg"]);
-          emit(UpdateProfileFailure(error: data["msg"]));
-        }
-      }
-    } catch (error) {
-      if (error is TimeoutException) {
-        debugPrint("Request timed out");
-        emit(Timeoutt());
-      } else {
-        debugPrint(error.toString());
-        emit(UpdateProfileFailure(error: error.toString()));
-      }
-    }
+    await Future.delayed(const Duration(milliseconds: 600));
+    await CacheHelper.setUserProfile(
+      name: firstName,
+      phone: phone,
+      email: email,
+      avatar: profileImage.isNotEmpty ? profileImage.first.path : null,
+    );
+    profileImage.clear();
+    profileImageUrl = null;
+    await getUserData();
+    emit(UpdateProfileSuccess(
+      message: CacheHelper.getLang() == "en"
+          ? "Profile updated successfully"
+          : "تم تحديث البيانات بنجاح",
+    ));
   }
 
   Future contactUs({
@@ -241,37 +202,12 @@ class AppCubit extends Cubit<AppState> {
     required String message,
   }) async {
     emit(ContactUsLoading());
-    try {
-      http.Response response = await http
-          .post(
-            Uri.parse("${baseUrl}api/contact-us"),
-            body: {
-              "lang": CacheHelper.getLang(),
-              "name": name,
-              "email": email,
-              "message": message,
-            },
-          )
-          .timeout(const Duration(milliseconds: 8000));
-
-      if (response.statusCode == 500) {
-        emit(ServerError());
-      } else {
-        Map<String, dynamic> data = jsonDecode(response.body);
-        debugPrint(data.toString());
-
-        if (data["key"] == 1) {
-          emit(ContactUsSuccess(message: data["msg"]));
-        } else {
-          emit(ContactUsFailure(error: data["msg"]));
-        }
-      }
-    } catch (error) {
-      if (error is TimeoutException) {
-        debugPrint("Request timed out");
-        emit(Timeoutt());
-      }
-    }
+    await Future.delayed(const Duration(milliseconds: 600));
+    emit(ContactUsSuccess(
+      message: CacheHelper.getLang() == "en"
+          ? "Your message has been sent"
+          : "تم إرسال رسالتك بنجاح",
+    ));
   }
 
   List<Course> courses = [
