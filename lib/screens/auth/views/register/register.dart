@@ -1,17 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:unicourse/core/constants/colors.dart';
 import 'package:unicourse/screens/auth/views/otp/otp.dart';
 import 'package:unicourse/screens/auth/views/register/widgets/user_fields.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../data/auth_cubit.dart';
 import '../widgets/auth_header.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../../core/constants/colors.dart';
-import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/app_router.dart';
 import '../../../../../../core/widgets/app_text.dart';
 import '../../../../../../core/widgets/flash_message.dart';
+import '../../../../../../core/widgets/primary_button.dart';
 import '../../../../../../gen/fonts.gen.dart';
 
 final _formKey = GlobalKey<FormState>();
@@ -26,15 +26,20 @@ class Register extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAr = context.locale.languageCode == 'ar';
     return Scaffold(
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.only(top: 72.h),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              CustomAuthHeader(text: LocaleKeys.newUser.tr()),
+              CustomAuthHeader(
+                text: LocaleKeys.newUser.tr(),
+                subtitle: isAr
+                    ? 'أنشئ حسابك وابدأ التعلّم اليوم'
+                    : 'Create your account and start learning',
+              ),
               CustomUserRegisterFields(
                 formKey: _formKey,
                 nameController: _nameController,
@@ -65,9 +70,11 @@ class Register extends StatelessWidget {
                   }
                 },
                 builder: (context, state) {
-                  return AppButton(
-                    top: 24.h,
-                    bottom: 29.h,
+                  return PrimaryButton(
+                    text: LocaleKeys.signingUp.tr(),
+                    icon: Icons.person_add_alt_1_rounded,
+                    loading: state is RegisterLoading,
+                    margin: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 20.h),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         await AuthCubit.get(context).register(
@@ -78,16 +85,6 @@ class Register extends StatelessWidget {
                         );
                       }
                     },
-                    child:
-                        state is RegisterLoading
-                            ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                            : AppText(
-                              text: LocaleKeys.signingUp.tr(),
-                              color: Colors.white,
-                              family: FontFamily.dINArabicBold,
-                            ),
                   );
                 },
               ),
@@ -97,22 +94,20 @@ class Register extends StatelessWidget {
                   AppText(
                     text: LocaleKeys.alreadyHaveAccount.tr(),
                     size: 14.sp,
+                    color: context.palette.textSecondary,
                   ),
                   TextButton(
                     onPressed: () => AppRouter.pop(context),
-                    style: ButtonStyle(
-                      overlayColor: WidgetStatePropertyAll(
-                        AppColors.darkRed.withAlpha((0.1 * 255).toInt()),
-                      ),
-                    ),
                     child: AppText(
                       text: LocaleKeys.login.tr(),
                       size: 14.sp,
-                      color: AppColors.darkRed,
+                      color: context.palette.brand,
+                      family: FontFamily.dINArabicBold,
                     ),
                   ),
                 ],
               ),
+              SizedBox(height: 20.h),
             ],
           ),
         ),

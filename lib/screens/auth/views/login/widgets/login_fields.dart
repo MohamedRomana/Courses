@@ -50,7 +50,7 @@ class _CustomLoginFieldsState extends State<CustomLoginFields> {
                 return null;
               }
             },
-            prefixIcon: Icon(Icons.call, color: AppColors.primary, size: 25.sp),
+            prefixIcon: Icon(Icons.call, color: context.palette.brand, size: 25.sp),
           ),
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, state) {
@@ -67,7 +67,7 @@ class _CustomLoginFieldsState extends State<CustomLoginFields> {
                 },
                 prefixIcon: Icon(
                   Icons.lock,
-                  color: AppColors.primary,
+                  color: context.palette.brand,
                   size: 25.sp,
                 ),
                 secureText: AuthCubit.get(context).isSecureLogIn,
@@ -83,7 +83,7 @@ class _CustomLoginFieldsState extends State<CustomLoginFields> {
                             padding: EdgeInsets.all(8.h),
                             child: Icon(
                               Icons.visibility_off,
-                              color: AppColors.primary,
+                              color: context.palette.brand,
                               size: 21.sp,
                             ),
                           ),
@@ -98,7 +98,7 @@ class _CustomLoginFieldsState extends State<CustomLoginFields> {
                             padding: EdgeInsets.all(8.h),
                             child: Icon(
                               Icons.visibility,
-                              color: AppColors.primary,
+                              color: context.palette.brand,
                               size: 21.sp,
                             ),
                           ),

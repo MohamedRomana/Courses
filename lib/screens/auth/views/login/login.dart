@@ -4,9 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:unicourse/core/constants/colors.dart';
 import 'package:unicourse/core/widgets/app_router.dart';
+import 'package:unicourse/core/widgets/primary_button.dart';
 import 'package:unicourse/generated/locale_keys.g.dart';
 import '../../../../../core/service/cubit/app_cubit.dart';
-import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_text.dart';
 import '../../../../../core/widgets/flash_message.dart';
 import '../../../../../gen/fonts.gen.dart';
@@ -27,24 +27,42 @@ class LogIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAr = context.locale.languageCode == 'ar';
     return Scaffold(
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.only(top: 72.h),
         child: Column(
           children: [
-            CustomAuthHeader(text: LocaleKeys.login.tr()),
+            CustomAuthHeader(
+              text: LocaleKeys.login.tr(),
+              subtitle: isAr
+                  ? 'سجّل دخولك وكمّل رحلة تعلّمك'
+                  : 'Sign in and continue learning',
+            ),
             CustomLoginFields(
               formKey: _formKey,
               phoneController: _phoneController,
               passController: _passController,
+            ),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(
+                onPressed: () =>
+                    AppRouter.navigateTo(context, const ForgetPass()),
+                child: AppText(
+                  text: LocaleKeys.forgetPass.tr(),
+                  size: 13.sp,
+                  end: 18.w,
+                  color: context.palette.brand,
+                  family: FontFamily.dINArabicBold,
+                ),
+              ),
             ),
             BlocConsumer<AuthCubit, AuthState>(
               listener: (context, state) {
                 if (state is LogInSuccess) {
                   AppCubit.get(context).changebottomNavIndex(0);
                   AppRouter.navigateAndFinish(context, const HomeLayout());
-
                   _phoneController.clear();
                   _passController.clear();
                   showFlashMessage(
@@ -61,9 +79,11 @@ class LogIn extends StatelessWidget {
                 }
               },
               builder: (context, state) {
-                return AppButton(
-                  top: 24.h,
-                  bottom: 30.h,
+                return PrimaryButton(
+                  text: LocaleKeys.signin.tr(),
+                  icon: Icons.login_rounded,
+                  loading: state is LogInLoading,
+                  margin: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       await AuthCubit.get(context).logIn(
@@ -72,54 +92,30 @@ class LogIn extends StatelessWidget {
                       );
                     }
                   },
-                  child:
-                      state is LogInLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : AppText(
-                            text: LocaleKeys.signin.tr(),
-                            color: Colors.white,
-                            family: FontFamily.dINArabicBold,
-                          ),
                 );
               },
             ),
-            TextButton(
-              onPressed:
-                  () => AppRouter.navigateTo(context, const ForgetPass()),
-              style: ButtonStyle(
-                overlayColor: WidgetStatePropertyAll(
-                  AppColors.darkRed.withAlpha((0.1 * 255).toInt()),
-                ),
-              ),
-              child: AppText(
-                text: LocaleKeys.forgetPass.tr(),
-                size: 14.sp,
-                color: AppColors.darkRed,
-              ),
-            ),
-            SizedBox(height: 10.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AppText(text: LocaleKeys.dontHaveAccount.tr(), size: 14.sp),
+                AppText(
+                  text: LocaleKeys.dontHaveAccount.tr(),
+                  size: 14.sp,
+                  color: context.palette.textSecondary,
+                ),
                 TextButton(
-                  onPressed: () {
-                    AppRouter.navigateTo(context, const Register());
-                  },
-                  style: ButtonStyle(
-                    overlayColor: WidgetStatePropertyAll(
-                      AppColors.darkRed.withAlpha((0.1 * 255).toInt()),
-                    ),
-                  ),
+                  onPressed: () =>
+                      AppRouter.navigateTo(context, const Register()),
                   child: AppText(
                     text: LocaleKeys.newUser.tr(),
                     size: 14.sp,
-                    color: AppColors.darkRed,
+                    color: context.palette.brand,
+                    family: FontFamily.dINArabicBold,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 20.h),
           ],
         ),
       ),

@@ -90,6 +90,8 @@ class AppInput extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+    final radius = border ?? 16.r;
     return Padding(
       padding: EdgeInsetsDirectional.only(
         start: start ?? 16.w,
@@ -105,9 +107,9 @@ class AppInput extends StatelessWidget {
         autovalidateMode: AutovalidateMode.onUserInteraction,
         controller: controller,
         onFieldSubmitted: onSubmitted,
-        style: TextStyle(color: AppColors.primary, fontSize: 16.sp),
+        style: TextStyle(color: palette.textPrimary, fontSize: 15.sp),
         obscureText: secureText ?? false,
-        cursorColor: cursorColor ?? AppColors.primary,
+        cursorColor: cursorColor ?? palette.brand,
         keyboardType: inputType ?? TextInputType.text,
         textInputAction: textInputAction ?? TextInputAction.next,
         validator: validate,
@@ -115,55 +117,49 @@ class AppInput extends StatelessWidget {
         autofocus: autofocus ?? false,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(border ?? 12.r),
+            borderRadius: BorderRadius.circular(radius),
             borderSide: BorderSide(
-              // width: .1.w,
-              color: enabledBorderColor ?? Colors.white,
+              color: enabledBorderColor ?? palette.border,
             ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(border ?? 12.r),
-            borderSide:
-                BorderSide(color: focusedBorderColor ?? AppColors.primary),
+            borderRadius: BorderRadius.circular(radius),
+            borderSide: BorderSide(
+                color: focusedBorderColor ?? palette.brand, width: 1.6),
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(border ?? 12.r),
-            borderSide:
-                BorderSide(color: errorBorderColor ?? AppColors.primary),
+            borderRadius: BorderRadius.circular(radius),
+            borderSide: BorderSide(color: errorBorderColor ?? palette.error),
           ),
           focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(border ?? 12.r),
-            borderSide:
-                BorderSide(color: focusedErrorBorderColor ?? AppColors.primary),
+            borderRadius: BorderRadius.circular(radius),
+            borderSide: BorderSide(
+                color: focusedErrorBorderColor ?? palette.error, width: 1.6),
           ),
           disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(border ?? 12.r),
-            borderSide: BorderSide(color: disableBorderColor ?? Colors.white),
+            borderRadius: BorderRadius.circular(radius),
+            borderSide: BorderSide(color: disableBorderColor ?? palette.border),
           ),
           contentPadding: EdgeInsets.symmetric(
-              vertical: contentTop ?? 12.h, horizontal: contentRight ?? 10.w),
+              vertical: contentTop ?? 16.h, horizontal: contentRight ?? 14.w),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(border ?? 12.r),
+            borderRadius: BorderRadius.circular(radius),
             borderSide:
-                BorderSide(color: outLineInputColorColor ?? AppColors.primary),
+                BorderSide(color: outLineInputColorColor ?? palette.border),
           ),
-          filled: filled ?? false,
-          fillColor: color ?? const Color(0xffEFEFEF),
+          filled: filled ?? true,
+          fillColor: color ?? palette.surfaceMuted,
           prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
-          // prefixIconConstraints:
-          //     prefixSize ?? BoxConstraints(maxHeight: 35.h, maxWidth: 45.w),
-          // suffixIconConstraints:
-          //     suffixSize ?? BoxConstraints(maxHeight: 35.h, maxWidth: 60.w),
           labelText: label,
           labelStyle: TextStyle(
             fontSize: 14.sp,
-            color: Colors.white,
+            color: palette.textSecondary,
             fontFamily: FontFamily.dINArabicMedium,
           ),
           hintStyle: TextStyle(
             fontSize: MediaQuery.of(context).size.width >= 600 ? 12.sp : 14.sp,
-            color: hintColor ?? Colors.grey,
+            color: hintColor ?? palette.textMuted,
             fontFamily: FontFamily.dINArabicMedium,
           ),
           hintText: hint,

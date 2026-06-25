@@ -58,7 +58,7 @@ class _CustomUserRegisterFieldsState extends State<CustomUserRegisterFields> {
               return null;
             }
           },
-          prefixIcon: Icon(Icons.person, color: AppColors.primary, size: 25.sp),
+          prefixIcon: Icon(Icons.person, color: context.palette.brand, size: 25.sp),
         ),
         AppInput(
           bottom: 16.h,
@@ -73,7 +73,7 @@ class _CustomUserRegisterFieldsState extends State<CustomUserRegisterFields> {
               return null;
             }
           },
-          prefixIcon: Icon(Icons.call, color: AppColors.primary, size: 25.sp),
+          prefixIcon: Icon(Icons.call, color: context.palette.brand, size: 25.sp),
         ),
         AppInput(
           bottom: 16.h,
@@ -88,7 +88,7 @@ class _CustomUserRegisterFieldsState extends State<CustomUserRegisterFields> {
               return null;
             }
           },
-          prefixIcon: Icon(Icons.email, color: AppColors.primary, size: 25.sp),
+          prefixIcon: Icon(Icons.email, color: context.palette.brand, size: 25.sp),
         ),
         BlocBuilder<AuthCubit, AuthState>(
           builder: (context, state) {
@@ -106,7 +106,7 @@ class _CustomUserRegisterFieldsState extends State<CustomUserRegisterFields> {
               },
               prefixIcon: Icon(
                 Icons.lock,
-                color: AppColors.primary,
+                color: context.palette.brand,
                 size: 25.sp,
               ),
               secureText: AuthCubit.get(context).isSecureRegister1,
@@ -122,7 +122,7 @@ class _CustomUserRegisterFieldsState extends State<CustomUserRegisterFields> {
                           padding: EdgeInsets.all(8.h),
                           child: Icon(
                             Icons.visibility_off,
-                            color: AppColors.primary,
+                            color: context.palette.brand,
                             size: 21.sp,
                           ),
                         ),
@@ -137,7 +137,7 @@ class _CustomUserRegisterFieldsState extends State<CustomUserRegisterFields> {
                           padding: EdgeInsets.all(8.h),
                           child: Icon(
                             Icons.visibility,
-                            color: AppColors.primary,
+                            color: context.palette.brand,
                             size: 21.sp,
                           ),
                         ),
@@ -161,7 +161,7 @@ class _CustomUserRegisterFieldsState extends State<CustomUserRegisterFields> {
               },
               prefixIcon: Icon(
                 Icons.lock,
-                color: AppColors.primary,
+                color: context.palette.brand,
                 size: 25.sp,
               ),
               secureText: AuthCubit.get(context).isSecureRegister2,
@@ -177,7 +177,7 @@ class _CustomUserRegisterFieldsState extends State<CustomUserRegisterFields> {
                           padding: EdgeInsets.all(8.h),
                           child: Icon(
                             Icons.visibility_off,
-                            color: AppColors.primary,
+                            color: context.palette.brand,
                             size: 21.sp,
                           ),
                         ),
@@ -192,7 +192,7 @@ class _CustomUserRegisterFieldsState extends State<CustomUserRegisterFields> {
                           padding: EdgeInsets.all(8.h),
                           child: Icon(
                             Icons.visibility,
-                            color: AppColors.primary,
+                            color: context.palette.brand,
                             size: 21.sp,
                           ),
                         ),
