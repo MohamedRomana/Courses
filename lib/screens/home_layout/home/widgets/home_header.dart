@@ -5,8 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/service/cubit/app_cubit.dart';
 import '../../../../core/service/cubit/theme_cubit.dart';
+import '../../../../core/widgets/app_router.dart';
 import '../../../../gen/fonts.gen.dart';
 import '../../../../generated/locale_keys.g.dart';
+import '../../../notifications/notifications.dart';
 
 /// The home screen's hero header — a brand gradient panel with a greeting,
 /// a theme switch, a notifications button and a tappable search field that
@@ -71,8 +73,9 @@ class HomeHeader extends StatelessWidget {
                 SizedBox(width: 10.w),
                 _GlassIconButton(
                   icon: Icons.notifications_none_rounded,
-                  onTap: () {},
-                  showDot: true,
+                  onTap: () => AppRouter.navigateTo(
+                      context, const NotificationsScreen()),
+                  showDot: AppCubit.get(context).unreadNotifications > 0,
                 ),
               ],
             ),

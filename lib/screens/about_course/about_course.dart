@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,28 +53,17 @@ class _AboutCourseState extends State<AboutCourse> {
         CacheHelper.getUserId() != "";
     return BlocBuilder<AppCubit, AppState>(
       builder: (context, state) {
-        return YoutubePlayerBuilder(
-          player: YoutubePlayer(
-            controller: _controller,
-            showVideoProgressIndicator: true,
-            progressColors: ProgressBarColors(
-              playedColor: palette.brand,
-              handleColor: palette.accent,
-            ),
-          ),
-          builder: (context, player) {
             return Scaffold(
               bottomNavigationBar:
                   _SubscribeBar(course: widget.course, isSubscribed: isSubscribed),
               body: Column(
                 children: [
-                  // ── Player with overlay back button ──
+                  // ── Lazy video stage (thumbnail until played) + back button ──
                   Stack(
                     children: [
-                      ClipRRect(
-                        borderRadius:
-                            BorderRadius.vertical(bottom: Radius.circular(24.r)),
-                        child: SizedBox(height: 232.h, child: player),
+                      _VideoStage(
+                        controller: _controller,
+                        course: widget.course,
                       ),
                       PositionedDirectional(
                         top: MediaQuery.of(context).padding.top + 8.h,
@@ -174,9 +164,146 @@ class _AboutCourseState extends State<AboutCourse> {
                 ],
               ),
             );
-          },
-        );
       },
+    );
+  }
+}
+
+/// A lightweight video stage: shows the YouTube thumbnail with a play button
+/// and only mounts the (heavy) player webview once the user starts watching or
+/// taps a lesson — keeping the course screen fast to open.
+class _VideoStage extends StatefulWidget {
+  final YoutubePlayerController controller;
+  final Course course;
+  const _VideoStage({required this.controller, required this.course});
+
+  @override
+  State<_VideoStage> createState() => _VideoStageState();
+}
+
+class _VideoStageState extends State<_VideoStage> {
+  bool _started = false;
+  String _thumbId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _thumbId =
+        YoutubePlayer.convertUrlToId(widget.course.youTubeLink) ?? '';
+    widget.controller.addListener(_onChange);
+  }
+
+  void _onChange() {
+    if (!mounted) return;
+    final id = widget.controller.metadata.videoId;
+    if (id.isNotEmpty && id != _thumbId) {
+      setState(() => _thumbId = id);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onChange);
+    super.dispose();
+  }
+
+  void _startWith(String? videoId) {
+    setState(() => _started = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (videoId != null && videoId.isNotEmpty) {
+        widget.controller.load(videoId);
+      } else {
+        widget.controller.play();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return BlocListener<AppCubit, AppState>(
+      listenWhen: (p, c) => c is ChangeVideoState,
+      listener: (context, state) {
+        // A lesson was tapped — reveal the player if it isn't showing yet.
+        if (!_started) {
+          _startWith(AppCubit.get(context).currentPlayingVideoUrl);
+        }
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24.r)),
+        child: SizedBox(
+          height: 232.h,
+          width: double.infinity,
+          child: _started
+              ? YoutubePlayer(
+                  controller: widget.controller,
+                  showVideoProgressIndicator: true,
+                  progressColors: ProgressBarColors(
+                    playedColor: palette.brand,
+                    handleColor: palette.accent,
+                  ),
+                  bottomActions: const [
+                    SizedBox(width: 10),
+                    CurrentPosition(),
+                    SizedBox(width: 8),
+                    ProgressBar(isExpanded: true),
+                    SizedBox(width: 8),
+                    RemainingDuration(),
+                    SizedBox(width: 10),
+                  ],
+                )
+              : _thumbnail(palette),
+        ),
+      ),
+    );
+  }
+
+  Widget _thumbnail(AppPalette palette) {
+    return GestureDetector(
+      onTap: () => _startWith(null),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CachedNetworkImage(
+            imageUrl: 'https://img.youtube.com/vi/$_thumbId/hqdefault.jpg',
+            fit: BoxFit.cover,
+            fadeInDuration: const Duration(milliseconds: 250),
+            placeholder: (_, __) => Container(color: palette.surfaceAlt),
+            errorWidget: (_, __, ___) => Image.asset(
+              widget.course.image2,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x33000000), Color(0x88000000)],
+              ),
+            ),
+          ),
+          Center(
+            child: Container(
+              width: 66.w,
+              height: 66.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(colors: [palette.brand, palette.accent]),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Icon(Icons.play_arrow_rounded,
+                  color: Colors.white, size: 38.sp),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

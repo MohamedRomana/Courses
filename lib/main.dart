@@ -58,10 +58,9 @@ class UniCourse extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider(
-              create:
-                  (context) =>
-                      CacheHelper.getUserId() == "" ? AppCubit() : AppCubit()
-                        ..getUserData(),
+              create: (context) =>
+                  CacheHelper.getUserId() == "" ? AppCubit() : AppCubit()
+                    ..getUserData(),
             ),
             BlocProvider(create: (context) => AuthCubit()),
             BlocProvider(create: (context) => ThemeCubit()),

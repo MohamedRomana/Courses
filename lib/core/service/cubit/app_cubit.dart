@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:unicourse/core/models/app_notification.dart';
 import 'package:unicourse/core/models/courses.dart';
 import 'package:unicourse/core/models/learning_programs_model.dart';
 import '../../../generated/locale_keys.g.dart';
@@ -33,6 +34,52 @@ class AppCubit extends Cubit<AppState> {
   void changebottomNavIndex(index) async {
     bottomNavIndex = index;
     emit(ChangeBottomNav());
+  }
+
+  // ── In-app notifications (offline/demo) ──
+  List<AppNotification> notifications = [
+    AppNotification(
+      type: NotificationType.system,
+      arTitle: 'مرحبًا بك في UniCourse 👋',
+      enTitle: 'Welcome to UniCourse 👋',
+      arBody: 'ابدأ رحلتك التعليمية واكتشف أحدث الدورات.',
+      enBody: 'Start learning and explore our latest courses.',
+      arTime: 'الآن',
+      enTime: 'now',
+    ),
+    AppNotification(
+      type: NotificationType.offer,
+      arTitle: 'عرض خاص 🎉',
+      enTitle: 'Special offer 🎉',
+      arBody: 'خصم على الدورات المختارة لفترة محدودة.',
+      enBody: 'Limited-time discount on selected courses.',
+      arTime: 'منذ ساعة',
+      enTime: '1h ago',
+    ),
+    AppNotification(
+      type: NotificationType.course,
+      arTitle: 'دورات جديدة متاحة',
+      enTitle: 'New courses available',
+      arBody: 'تمت إضافة دورات جديدة في التكنولوجيا والتطوير.',
+      enBody: 'Fresh technology & development courses were added.',
+      arTime: 'أمس',
+      enTime: 'yesterday',
+      read: true,
+    ),
+  ];
+
+  int get unreadNotifications => notifications.where((n) => !n.read).length;
+
+  void markAllNotificationsRead() {
+    for (final n in notifications) {
+      n.read = true;
+    }
+    emit(NotificationsUpdated());
+  }
+
+  void pushNotification(AppNotification notification) {
+    notifications.insert(0, notification);
+    emit(NotificationsUpdated());
   }
 
   String searchQuery = "";
@@ -1193,10 +1240,18 @@ class AppCubit extends Cubit<AppState> {
 
   List<Course> selectedCourses = CacheHelper.getSelectedCourses();
   void addOrRemoveSelectedCourse(Course course) async {
-    if (selectedCourses.any((c) => c.title == course.title)) {
+    final wasEnrolled = selectedCourses.any((c) => c.title == course.title);
+    if (wasEnrolled) {
       CacheHelper.removeSelectedCourse(course.title);
     } else {
       CacheHelper.addSelectedCourse(course);
+      pushNotification(AppNotification(
+        type: NotificationType.course,
+        arTitle: 'تم تسجيلك في الدورة ✅',
+        enTitle: 'You are enrolled ✅',
+        arBody: 'اشتركت في "${course.title}". بالتوفيق في رحلتك!',
+        enBody: 'You enrolled in "${course.title}". Good luck!',
+      ));
     }
     selectedCourses = CacheHelper.getSelectedCourses();
     emit(CourseSelected());
@@ -1204,8 +1259,18 @@ class AppCubit extends Cubit<AppState> {
 
   List<Course> completedCourses = CacheHelper.getCompletedCourses();
   void addCompletedCourse(Course course) async {
+    final alreadyDone = completedCourses.any((c) => c.title == course.title);
     CacheHelper.addCompletedCourse(course);
     completedCourses = CacheHelper.getCompletedCourses();
+    if (!alreadyDone) {
+      pushNotification(AppNotification(
+        type: NotificationType.achievement,
+        arTitle: 'مبروك! أتممت الدورة 🏆',
+        enTitle: 'Congrats! Course completed 🏆',
+        arBody: 'أنهيت "${course.title}". شهادتك جاهزة الآن.',
+        enBody: 'You finished "${course.title}". Your certificate is ready.',
+      ));
+    }
     emit(CourseCompleted());
   }
 

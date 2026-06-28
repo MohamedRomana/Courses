@@ -13,6 +13,8 @@ final class ChangeBottomNav extends AppState {}
 
 final class SearchUpdated extends AppState {}
 
+final class NotificationsUpdated extends AppState {}
+
 final class ChangeIndex extends AppState {}
 
 final class ChooseImageSuccess extends AppState {}

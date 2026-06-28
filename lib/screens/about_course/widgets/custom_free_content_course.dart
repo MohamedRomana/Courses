@@ -113,6 +113,7 @@ class _CustomFreeContentListState extends State<CustomFreeContentList> {
                       widget.course.freeVideos[0].url);
                   if (newVideoId != null) {
                     widget.controller.load(newVideoId);
+                    AppCubit.get(context).setCurrentPlayingVideo(newVideoId);
                   }
                 },
                 child: Container(
