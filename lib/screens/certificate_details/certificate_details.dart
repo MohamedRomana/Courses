@@ -12,9 +12,9 @@ import 'package:unicourse/core/constants/colors.dart';
 import 'package:unicourse/core/service/cubit/app_cubit.dart';
 import '../../core/models/courses.dart';
 import '../../core/widgets/custom_appbar.dart';
-import '../../core/widgets/custom_bottom_nav.dart';
 import '../../core/widgets/flash_message.dart';
 import '../../gen/assets.gen.dart';
+import '../../gen/fonts.gen.dart';
 import '../../generated/locale_keys.g.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -55,10 +55,9 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen> {
       }
 
       final tempDir = await getTemporaryDirectory();
-      final tempFile =
-          await File(
-            '${tempDir.path}/certificate_${DateTime.now().millisecondsSinceEpoch}.png',
-          ).create();
+      final tempFile = await File(
+        '${tempDir.path}/certificate_${DateTime.now().millisecondsSinceEpoch}.png',
+      ).create();
       await tempFile.writeAsBytes(imageBytes);
 
       const String saveDirPath = '/storage/emulated/0/DCIM/Certificates';
@@ -121,182 +120,202 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return BlocBuilder<AppCubit, AppState>(
       builder: (context, state) {
+        final name =
+            (AppCubit.get(context).userModel['first_name'] ?? '').toString();
         return Scaffold(
-          appBar: CustomAppBar(title: LocaleKeys.certificate.tr()),
-          bottomNavigationBar: const CustomBottomNav(),
+          appBar: CustomAppBar(title: LocaleKeys.certificate.tr(), isNoti: true),
           body: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 30.h),
             child: Column(
               children: [
                 Screenshot(
                   controller: _screenshotController,
-                  child: Center(
-                    child: Container(
-                      width: double.infinity,
-                      margin: EdgeInsets.all(16.r),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24.r),
-                        border: Border.all(
-                          color: AppColors.secondray,
-                          width: 3.w,
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 32.h,
-                              horizontal: 24.w,
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.emoji_events_rounded,
-                                  size: 60.sp,
-                                  color: Colors.amber,
-                                ),
-                                SizedBox(height: 16.h),
-                                Text(
-                                  LocaleKeys.completionCertificate.tr(),
-                                  style: TextStyle(
-                                    fontSize: 28.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.secondray,
-                                  ),
-                                ),
-                                SizedBox(height: 8.h),
-                                Text(
-                                  LocaleKeys.confirmationThat.tr(),
-                                  style: TextStyle(
-                                    fontSize: 18.sp,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                SizedBox(height: 16.h),
-                                Text(
-                                  AppCubit.get(context).userModel['first_name'],
-                                  style: TextStyle(
-                                    fontSize: 24.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                SizedBox(height: 16.h),
-                                Text(
-                                  LocaleKeys.successfullyCompletedCourse.tr(),
-                                  style: TextStyle(
-                                    fontSize: 18.sp,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                SizedBox(height: 12.h),
-                                Text(
-                                  widget.course.title,
-                                  style: TextStyle(
-                                    fontSize: 22.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.teal,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                SizedBox(height: 32.h),
-                                Divider(
-                                  color: AppColors.secondray,
-                                  thickness: 1.5,
-                                  indent: 50.w,
-                                  endIndent: 50.w,
-                                ),
-                                SizedBox(height: 24.h),
-                                Text(
-                                  LocaleKeys.congratulationsOnAchievement.tr(),
-                                  style: TextStyle(
-                                    fontSize: 20.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          PositionedDirectional(
-                            top: 0,
-                            end: 0,
-                            start: 0,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Image.asset(
-                                  Assets.img.logo.path,
-                                  height: 80.w,
-                                  width: 70.w,
-                                  fit: BoxFit.cover,
-                                ),
-                                Image.asset(
-                                  Assets.img.logo.path,
-                                  height: 80.w,
-                                  width: 70.w,
-                                  fit: BoxFit.cover,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: _certificate(name),
                 ),
                 SizedBox(height: 24.h),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton.icon(
-                      onPressed: _saveCertificate,
-                      icon: const Icon(Icons.download, color: Colors.white),
-                      label: Text(
-                        LocaleKeys.downloadCertificate.tr(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24.w,
-                          vertical: 12.h,
-                        ),
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.r),
-                        ),
+                    Expanded(
+                      child: _actionButton(
+                        icon: Icons.download_rounded,
+                        label: LocaleKeys.downloadCertificate.tr(),
+                        gradient: [palette.brand, palette.accent],
+                        onTap: _saveCertificate,
                       ),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: _shareCertificate,
-                      icon: const Icon(Icons.share, color: Colors.white),
-                      label: Text(
-                        LocaleKeys.share.tr(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24.w,
-                          vertical: 12.h,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.r),
-                        ),
+                    SizedBox(width: 14.w),
+                    Expanded(
+                      child: _actionButton(
+                        icon: Icons.share_rounded,
+                        label: LocaleKeys.share.tr(),
+                        gradient: AppColors.goldGradient,
+                        textColor: const Color(0xFF3A2A05),
+                        onTap: _shareCertificate,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 32.h),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  /// The certificate document — kept on a light background so it looks right
+  /// when downloaded / shared regardless of the app theme.
+  Widget _certificate(String name) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(6.r),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: AppColors.goldGradient),
+        borderRadius: BorderRadius.circular(24.r),
+      ),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 28.h, horizontal: 20.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFCFCFD),
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: const Color(0xFFE7C977), width: 1.4),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(Assets.img.logo.path,
+                height: 56.w, fit: BoxFit.contain),
+            SizedBox(height: 14.h),
+            Container(
+              width: 76.w,
+              height: 76.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(colors: AppColors.goldGradient),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.gold.withValues(alpha: 0.5),
+                    blurRadius: 16.r,
+                  ),
+                ],
+              ),
+              child: Icon(Icons.emoji_events_rounded,
+                  size: 42.sp, color: const Color(0xFF3A2A05)),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              LocaleKeys.completionCertificate.tr(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: FontFamily.dINArabicBold,
+                fontSize: 22.sp,
+                color: const Color(0xFF1A1B2E),
+              ),
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              LocaleKeys.confirmationThat.tr(),
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13.sp, color: const Color(0xFF6B6E82)),
+            ),
+            SizedBox(height: 14.h),
+            Text(
+              name.isEmpty ? 'UniCourse' : name,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: FontFamily.dINArabicBold,
+                fontSize: 24.sp,
+                color: AppColors.primary,
+              ),
+            ),
+            SizedBox(height: 14.h),
+            Text(
+              LocaleKeys.successfullyCompletedCourse.tr(),
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13.sp, color: const Color(0xFF6B6E82)),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              widget.course.title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: FontFamily.dINArabicBold,
+                fontSize: 18.sp,
+                color: const Color(0xFF1A1B2E),
+              ),
+            ),
+            SizedBox(height: 22.h),
+            Container(
+              height: 1.5,
+              margin: EdgeInsets.symmetric(horizontal: 40.w),
+              color: const Color(0xFFE7C977),
+            ),
+            SizedBox(height: 16.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.verified_rounded,
+                    size: 16.sp, color: AppColors.success),
+                SizedBox(width: 6.w),
+                Text(
+                  LocaleKeys.congratulationsOnAchievement.tr(),
+                  style: TextStyle(
+                    fontFamily: FontFamily.dINArabicBold,
+                    fontSize: 13.sp,
+                    color: AppColors.success,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _actionButton({
+    required IconData icon,
+    required String label,
+    required List<Color> gradient,
+    required VoidCallback onTap,
+    Color textColor = Colors.white,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 52.h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: gradient),
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: gradient.first.withValues(alpha: 0.35),
+              blurRadius: 14.r,
+              offset: Offset(0, 6.r),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: textColor, size: 19.sp),
+            SizedBox(width: 8.w),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: FontFamily.dINArabicBold,
+                fontSize: 14.sp,
+                color: textColor,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
