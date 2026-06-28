@@ -32,9 +32,13 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Signing with the debug keys so the APK is installable out of the box.
             signingConfig = signingConfigs.getByName("debug")
+            // Disable code shrinking: flutter_stripe references optional
+            // push-provisioning classes that make R8 fail, and we don't need
+            // minification for this build (payments run in offline/demo mode).
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
