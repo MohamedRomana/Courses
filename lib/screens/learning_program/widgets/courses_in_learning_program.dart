@@ -2,10 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:unicourse/core/constants/colors.dart';
 import 'package:unicourse/core/widgets/app_router.dart';
-import '../../../core/constants/colors.dart';
 import '../../../core/service/cubit/app_cubit.dart';
-import '../../../core/widgets/app_text.dart';
 import '../../../gen/fonts.gen.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../about_course/about_course.dart';
@@ -16,105 +15,100 @@ class CoursesInLearningProgram extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final learningProgramsList =
-        AppCubit.get(context).learningProgramsList[index];
+    final palette = context.palette;
+    final program = AppCubit.get(context).learningProgramsList[index];
     return BlocBuilder<AppCubit, AppState>(
       builder: (context, state) {
         return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppText(
-                top: 16.h,
-                start: 16.w,
-                text:
-                    '${learningProgramsList.coursesCount} ${LocaleKeys.courses.tr()}',
-                size: 20.sp,
-                color: AppColors.primary,
-                family: FontFamily.dINArabicBold,
+              Text(
+                '${program.coursesCount} ${LocaleKeys.courses.tr()}',
+                style: TextStyle(
+                  fontFamily: FontFamily.dINArabicBold,
+                  fontSize: 18.sp,
+                  color: palette.textPrimary,
+                ),
               ),
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.all(16.r),
-                itemCount: learningProgramsList.learningProgramsCourses.length,
-                separatorBuilder: (context, subindex) => SizedBox(height: 16.h),
-                itemBuilder:
-                    (context, subindex) => InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () {
-                        AppRouter.navigateTo(
-                          context,
-                          AboutCourse(
-                            course: AppCubit.get(context).courses[index],
+              SizedBox(height: 14.h),
+              ...List.generate(program.learningProgramsCourses.length, (i) {
+                final c = program.learningProgramsCourses[i];
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 14.h),
+                  child: GestureDetector(
+                    onTap: () => AppRouter.navigateTo(
+                      context,
+                      AboutCourse(course: AppCubit.get(context).courses[index]),
+                    ),
+                    child: Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: palette.surface,
+                        borderRadius: BorderRadius.circular(18.r),
+                        border: Border.all(color: palette.border),
+                        boxShadow: [
+                          BoxShadow(
+                            color: palette.shadow,
+                            blurRadius: 14.r,
+                            offset: Offset(0, 6.r),
                           ),
-                        );
-                      },
-                      child: Container(
-                        width: 343.w,
-                        decoration: BoxDecoration(
-                          color: AppColors.borderColor,
-                          borderRadius: BorderRadius.circular(10.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withAlpha(100),
-                              blurRadius: 5.r,
-                              spreadRadius: 1.r,
-                              offset: Offset(0, 5.r),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadiusDirectional.only(
-                                bottomStart: Radius.circular(10.r),
-                                topStart: Radius.circular(10.r),
-                              ),
-                              child: Image.asset(
-                                learningProgramsList
-                                    .learningProgramsCourses[subindex]
-                                    .image,
-                                height: 100.w,
-                                width: 100.w,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Column(
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset(c.image,
+                              height: 88.w, width: 88.w, fit: BoxFit.cover),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(
-                                  width: 220.w,
-                                  child: AppText(
-                                    start: 16.w,
-                                    color: AppColors.primary,
-                                    family: FontFamily.dINArabicBold,
-                                    text:
-                                        learningProgramsList
-                                            .learningProgramsCourses[subindex]
-                                            .title,
-                                    lines: 2,
+                                Text(
+                                  c.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: FontFamily.dINArabicBold,
+                                    fontSize: 14.sp,
+                                    color: palette.textPrimary,
                                   ),
                                 ),
-                                SizedBox(
-                                  width: 220.w,
-                                  child: AppText(
-                                    start: 16.w,
-                                    color: Colors.black,
-                                    text:
-                                        learningProgramsList
-                                            .learningProgramsCourses[subindex]
-                                            .name,
-                                  ),
+                                SizedBox(height: 4.h),
+                                Row(
+                                  children: [
+                                    Icon(Icons.person_outline_rounded,
+                                        size: 13.sp, color: palette.textMuted),
+                                    SizedBox(width: 4.w),
+                                    Expanded(
+                                      child: Text(
+                                        c.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: palette.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.only(end: 12.w),
+                            child: Icon(Icons.play_circle_fill_rounded,
+                                color: palette.brand, size: 28.sp),
+                          ),
+                        ],
                       ),
                     ),
-              ),
+                  ),
+                );
+              }),
             ],
           ),
         );

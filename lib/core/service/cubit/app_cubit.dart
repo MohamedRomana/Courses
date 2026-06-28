@@ -35,6 +35,21 @@ class AppCubit extends Cubit<AppState> {
     emit(ChangeBottomNav());
   }
 
+  String searchQuery = "";
+  void searchCourses(String? query) {
+    searchQuery = (query ?? "").trim();
+    if (searchQuery.isEmpty) {
+      filteredCourses = courses;
+    } else {
+      final q = searchQuery.toLowerCase();
+      filteredCourses = courses.where((course) {
+        return course.title.toLowerCase().contains(q) ||
+            course.name.toLowerCase().contains(q);
+      }).toList();
+    }
+    emit(SearchUpdated());
+  }
+
   bool hasRead = false;
   void readDesc() {
     hasRead = !hasRead;

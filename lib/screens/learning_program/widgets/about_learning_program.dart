@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:unicourse/generated/locale_keys.g.dart';
-
 import '../../../core/constants/colors.dart';
 import '../../../core/service/cubit/app_cubit.dart';
-import '../../../core/widgets/app_text.dart';
 import '../../../gen/fonts.gen.dart';
 
 class AboutLearningProgram extends StatefulWidget {
@@ -26,100 +24,113 @@ class _AboutLearningProgramState extends State<AboutLearningProgram> {
 
   @override
   Widget build(BuildContext context) {
-    final learningProgramsList =
-        AppCubit.get(context).learningProgramsList[widget.index];
+    final palette = context.palette;
+    final program = AppCubit.get(context).learningProgramsList[widget.index];
+    final isAr = context.locale.languageCode == 'ar';
+
     return BlocBuilder<AppCubit, AppState>(
       builder: (context, state) {
+        final collapsed = AppCubit.get(context).hasRead;
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 30.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppText(
-                start: 16.w,
-                top: 24.h,
-                text: LocaleKeys.what_you_will_learn.tr(),
-                size: 18.sp,
-                family: FontFamily.dINArabicBold,
+              Text(
+                LocaleKeys.what_you_will_learn.tr(),
+                style: TextStyle(
+                  fontFamily: FontFamily.dINArabicBold,
+                  fontSize: 18.sp,
+                  color: palette.textPrimary,
+                ),
               ),
-              ListView.separated(
-                padding: EdgeInsets.all(16.r),
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: learningProgramsList.whatYouLearn.length,
-                separatorBuilder: (context, index) => SizedBox(height: 16.h),
-                itemBuilder:
-                    (context, index) => Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.done, color: AppColors.primary, size: 24.sp),
-                        SizedBox(
-                          width: 300.w,
-                          child: AppText(
-                            text:
-                                learningProgramsList.whatYouLearn[index].title,
-                            size: 14.sp,
-                            color: AppColors.primary,
-                            start: 10.w,
-                            lines: 5,
-                          ),
-                        ),
-                      ],
-                    ),
-              ),
-              AppText(
-                start: 16.w,
-                top: 24.h,
-                bottom: 16.h,
-                text: LocaleKeys.about_learning_program.tr(),
-                size: 18.sp,
-                family: FontFamily.dINArabicBold,
-              ),
-              Stack(
-                children: [
-                  AppText(
-                    start: 16.w,
-                    end: 16.w,
-                    bottom: AppCubit.get(context).hasRead ? 16.h : 25.h,
-                    textAlign: TextAlign.center,
-                    text: learningProgramsList.desc,
-                    lines: AppCubit.get(context).hasRead ? 4 : 100,
-                    size: 16.sp,
-                  ),
-                  AppCubit.get(context).hasRead
-                      ? Container(
-                        height: 100.h,
+              SizedBox(height: 14.h),
+              ...List.generate(program.whatYouLearn.length, (i) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 26.w,
+                        height: 26.w,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.scaffoldBackgroundColor.withAlpha(100),
-                              AppColors.scaffoldBackgroundColor.withAlpha(200),
-                              AppColors.scaffoldBackgroundColor,
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
+                          color: palette.brandSoft,
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Icon(Icons.check_rounded,
+                            color: palette.brand, size: 16.sp),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 3.h),
+                          child: Text(
+                            program.whatYouLearn[i].title,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              height: 1.4,
+                              color: palette.textSecondary,
+                            ),
                           ),
                         ),
-                      )
-                      : const SizedBox.shrink(),
-                  PositionedDirectional(
-                    bottom: AppCubit.get(context).hasRead ? 0.h : -10.h,
-                    start: 16.w,
-                    end: 16.w,
-                    child: IconButton(
-                      onPressed: () {
-                        AppCubit.get(context).readDesc();
-                      },
-                      icon: Icon(
-                        AppCubit.get(context).hasRead
-                            ? Icons.arrow_circle_down
-                            : Icons.arrow_circle_up,
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              SizedBox(height: 14.h),
+              Text(
+                LocaleKeys.about_learning_program.tr(),
+                style: TextStyle(
+                  fontFamily: FontFamily.dINArabicBold,
+                  fontSize: 18.sp,
+                  color: palette.textPrimary,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                alignment: Alignment.topCenter,
+                child: Text(
+                  program.desc,
+                  maxLines: collapsed ? 4 : null,
+                  overflow:
+                      collapsed ? TextOverflow.ellipsis : TextOverflow.visible,
+                  style: TextStyle(
+                    fontSize: 14.5.sp,
+                    height: 1.7,
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ),
+              SizedBox(height: 6.h),
+              GestureDetector(
+                onTap: () => AppCubit.get(context).readDesc(),
+                child: Row(
+                  children: [
+                    Text(
+                      collapsed
+                          ? (isAr ? 'قراءة المزيد' : 'Read more')
+                          : (isAr ? 'عرض أقل' : 'Show less'),
+                      style: TextStyle(
+                        fontFamily: FontFamily.dINArabicBold,
+                        fontSize: 13.sp,
+                        color: palette.brand,
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(width: 4.w),
+                    Icon(
+                      collapsed
+                          ? Icons.keyboard_arrow_down_rounded
+                          : Icons.keyboard_arrow_up_rounded,
+                      size: 20.sp,
+                      color: palette.brand,
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 30.h),
             ],
           ),
         );
