@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:gal/gal.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:unicourse/core/constants/colors.dart';
@@ -34,17 +34,9 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen> {
 
   Future<void> _saveCertificate() async {
     try {
-      final status = await Permission.storage.request();
-      if (!status.isGranted) {
-        showFlashMessage(
-          context: context,
-          type: FlashMessageType.warning,
-          message: LocaleKeys.allowStorageFirst.tr(),
-        );
-        return;
-      }
-
-      final Uint8List? imageBytes = await _screenshotController.capture();
+      final Uint8List? imageBytes = await _screenshotController.capture(
+        delay: const Duration(milliseconds: 120),
+      );
       if (imageBytes == null) {
         showFlashMessage(
           context: context,
@@ -53,30 +45,42 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen> {
         );
         return;
       }
+      _lastCapturedImage = imageBytes;
 
-      final tempDir = await getTemporaryDirectory();
-      final tempFile = await File(
-        '${tempDir.path}/certificate_${DateTime.now().millisecondsSinceEpoch}.png',
-      ).create();
-      await tempFile.writeAsBytes(imageBytes);
-
-      const String saveDirPath = '/storage/emulated/0/DCIM/Certificates';
-      final Directory saveDir = Directory(saveDirPath);
-
-      if (!await saveDir.exists()) {
-        await saveDir.create(recursive: true);
+      // On Android 10+ no permission is needed (MediaStore); on older Android
+      // and iOS this shows the system gallery-access dialog.
+      if (!await Gal.hasAccess()) {
+        final granted = await Gal.requestAccess();
+        if (!granted) {
+          showFlashMessage(
+            context: context,
+            type: FlashMessageType.warning,
+            message: LocaleKeys.allowStorageFirst.tr(),
+          );
+          return;
+        }
       }
 
-      final String saveFilePath =
-          '$saveDirPath/certificate_${DateTime.now().millisecondsSinceEpoch}.png';
-      final File savedFile = await tempFile.copy(saveFilePath);
+      // Save the PNG to a temp file then hand it to the gallery (most reliable
+      // path across devices).
+      final tempDir = await getTemporaryDirectory();
+      final tempPath =
+          '${tempDir.path}/certificate_${widget.course.title.hashCode}.png';
+      await File(tempPath).writeAsBytes(imageBytes, flush: true);
 
-      _lastCapturedImage = await savedFile.readAsBytes();
+      await Gal.putImage(tempPath, album: 'UniCourse Certificates');
 
       showFlashMessage(
         context: context,
         type: FlashMessageType.success,
         message: LocaleKeys.certificateSavedInGallery.tr(),
+      );
+    } on GalException catch (e) {
+      debugPrint('Gal error saving certificate: ${e.type.message}');
+      showFlashMessage(
+        context: context,
+        type: FlashMessageType.error,
+        message: '${LocaleKeys.errorWhileSaving.tr()} (${e.type.name})',
       );
     } catch (e) {
       debugPrint('Error saving certificate: $e');

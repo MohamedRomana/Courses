@@ -22,10 +22,14 @@ class CertificatesScreen extends StatelessWidget {
       builder: (context, state) {
         final certs = AppCubit.get(context).completedCourses;
         return Scaffold(
-          appBar: CustomAppBar(title: LocaleKeys.certificates.tr(), isNoti: true),
+          appBar: CustomAppBar(
+            title: LocaleKeys.certificates.tr(),
+            isNoti: true,
+          ),
           body: certs.isEmpty
               ? Center(
-                  child: CustomLottieWidget(lottieName: Assets.img.emptyorder))
+                  child: CustomLottieWidget(lottieName: Assets.img.emptyorder),
+                )
               : ListView.separated(
                   physics: const BouncingScrollPhysics(),
                   padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
@@ -52,10 +56,12 @@ class CertificatesScreen extends StatelessWidget {
                         children: [
                           Stack(
                             children: [
-                              Image.asset(course.image,
-                                  height: 130.h,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover),
+                              Image.asset(
+                                course.image2,
+                                height: 130.h,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
                               Positioned.fill(
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
@@ -75,18 +81,23 @@ class CertificatesScreen extends StatelessWidget {
                                 start: 12.w,
                                 child: Container(
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: 10.w, vertical: 5.h),
+                                    horizontal: 10.w,
+                                    vertical: 5.h,
+                                  ),
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
-                                        colors: AppColors.goldGradient),
+                                      colors: AppColors.goldGradient,
+                                    ),
                                     borderRadius: BorderRadius.circular(30.r),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.emoji_events_rounded,
-                                          color: const Color(0xFF3A2A05),
-                                          size: 14.sp),
+                                      Icon(
+                                        Icons.emoji_events_rounded,
+                                        color: const Color(0xFF3A2A05),
+                                        size: 14.sp,
+                                      ),
                                       SizedBox(width: 5.w),
                                       Text(
                                         LocaleKeys.certificate.tr(),
@@ -137,22 +148,26 @@ class CertificatesScreen extends StatelessWidget {
                                     height: 46.h,
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
-                                      gradient: LinearGradient(colors: [
-                                        palette.brand,
-                                        palette.accent
-                                      ]),
+                                      gradient: LinearGradient(
+                                        colors: [palette.brand, palette.accent],
+                                      ),
                                       borderRadius: BorderRadius.circular(14.r),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.visibility_rounded,
-                                            color: Colors.white, size: 18.sp),
+                                        Icon(
+                                          Icons.visibility_rounded,
+                                          color: Colors.white,
+                                          size: 18.sp,
+                                        ),
                                         SizedBox(width: 8.w),
                                         Text(
                                           LocaleKeys.viewCertificate.tr(),
                                           style: TextStyle(
-                                            fontFamily: FontFamily.dINArabicBold,
+                                            fontFamily:
+                                                FontFamily.dINArabicBold,
                                             fontSize: 14.sp,
                                             color: Colors.white,
                                           ),
